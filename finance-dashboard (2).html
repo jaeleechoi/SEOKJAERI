@@ -167,40 +167,61 @@ function listenPath(path, cb){
 
 // 데이터 로드
 listenPath('finance/transactions', val=>{
-  if(val){
-    transactions = Object.entries(val).map(([k,v])=>({...v,_key:k}));
-    transactions.sort((a,b)=>b.date.localeCompare(a.date));
-  } else transactions=[];
-  renderLedger(); updateSyncDot('ok');
+  try{
+    if(val){
+      transactions = Object.entries(val).map(([k,v])=>({...v,_key:k}));
+      transactions.sort((a,b)=>b.date.localeCompare(a.date));
+    } else transactions=[];
+    if(typeof renderLedger==='function')renderLedger();
+    if(typeof updateSyncDot==='function')updateSyncDot('ok');
+  }catch(e){console.warn('tx listener:',e);}
 });
 listenPath('finance/assets', val=>{
-  if(val) assets=Object.entries(val).map(([k,v])=>({...v,_key:k}));
-  else assets=[];
-  updateBrokerFilter();renderAssets();renderPortfolioChart();renderOverview();
+  try{
+    if(val) assets=Object.entries(val).map(([k,v])=>({...v,_key:k}));
+    else assets=[];
+    if(typeof updateBrokerFilter==='function')updateBrokerFilter();
+    if(typeof renderAssets==='function')renderAssets();
+    if(typeof renderPortfolioChart==='function')renderPortfolioChart();
+    if(typeof renderOverview==='function')renderOverview();
+  }catch(e){console.warn('assets listener:',e);}
 });
 listenPath('finance/properties', val=>{
-  if(val) properties=Object.entries(val).map(([k,v])=>({...v,_key:k}));
-  else properties=[];
-  renderProperties();renderOverview();
+  try{
+    if(val) properties=Object.entries(val).map(([k,v])=>({...v,_key:k}));
+    else properties=[];
+    if(typeof renderProperties==='function')renderProperties();
+    if(typeof renderOverview==='function')renderOverview();
+  }catch(e){console.warn('props listener:',e);}
 });
 listenPath('finance/ipos', val=>{
-  if(val) ipos=Object.entries(val).map(([k,v])=>({...v,_key:k}));
-  else ipos=[];
-  renderIPO();renderIPOBrokerChart();
+  try{
+    if(val) ipos=Object.entries(val).map(([k,v])=>({...v,_key:k}));
+    else ipos=[];
+    if(typeof renderIPO==='function')renderIPO();
+    if(typeof renderIPOBrokerChart==='function')renderIPOBrokerChart();
+  }catch(e){console.warn('ipos listener:',e);}
 });
 listenPath('finance/portfolioTarget', val=>{
-  if(val) portfolioTarget={...portfolioTarget,...val};
-  renderPortfolioTarget();
+  try{
+    if(val) portfolioTarget={...portfolioTarget,...val};
+    if(typeof renderPortfolioTarget==='function')renderPortfolioTarget();
+  }catch(e){console.warn('target listener:',e);}
 });
 listenPath('finance/snapshots', val=>{
-  snapshots = val ? Object.entries(val).map(([k,v])=>({...v,_key:k})).sort((a,b)=>a.date.localeCompare(b.date)) : [];
-  renderSnapshotChart();
+  try{
+    snapshots = val ? Object.entries(val).map(([k,v])=>({...v,_key:k})).sort((a,b)=>a.date.localeCompare(b.date)) : [];
+    if(typeof renderSnapshotChart==='function')renderSnapshotChart();
+  }catch(e){console.warn('snapshots listener:',e);}
 });
 
 window._listenPath = listenPath;
 window._fbReady = true;
-updateSyncDot('ok');
-document.getElementById('sync-label').textContent = '실시간 동기화 연결됨';
+// 메인 스크립트가 로드된 후에 UI 업데이트
+setTimeout(()=>{
+  try{updateSyncDot('ok');}catch(e){}
+  try{document.getElementById('sync-label').textContent='실시간 동기화 연결됨';}catch(e){}
+}, 100);
 </script>
 
 <!-- PWA 설치 배너 -->
@@ -831,17 +852,19 @@ function fbRemove(path){
 
 // ── 탭 ──────────────────────────────────────────────────
 function switchTab(id,el){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('panel-'+id).classList.add('active');
-  if(id==='overview')renderOverview();
-  if(id==='portfolio'){renderPortfolioTarget();renderPortfolioCompare();}
-  if(id==='analysis')renderAnalysis();
-  if(id==='stocks'){updateBrokerFilter();renderAssets();renderPortfolioChart();}
-  if(id==='realestate')renderProperties();
-  if(id==='ipo'){renderIPO();renderIPOBrokerChart();}
-  if(id==='retire')calcRetire();
+  try{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('panel-'+id).classList.add('active');
+    if(id==='overview')renderOverview();
+    if(id==='portfolio'){renderPortfolioTarget();renderPortfolioCompare();}
+    if(id==='analysis')renderAnalysis();
+    if(id==='stocks'){updateBrokerFilter();renderAssets();renderPortfolioChart();}
+    if(id==='realestate')renderProperties();
+    if(id==='ipo'){renderIPO();renderIPOBrokerChart();}
+    if(id==='retire')calcRetire();
+  }catch(e){console.warn('switchTab error:',e);}
 }
 
 // ── 소유자 필터 ──────────────────────────────────────────
