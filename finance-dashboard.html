@@ -1090,7 +1090,6 @@ function addAsset(){
   document.getElementById('gold-section').style.display='none';
   onMarketChange();
 }
-}
 function deleteAsset(key){if(confirm('삭제할까요?'))fbRemove('finance/assets/'+key);}
 function updatePrice(key,v){fbSet('finance/assets/'+key+'/cur', parseFloat(v)||0);}
 async function refreshPricesAuto(){
